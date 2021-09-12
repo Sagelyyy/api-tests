@@ -11,8 +11,8 @@
     <h1 class='title'>Giphy API Search</h1>
   </section>
   <section class='content wrapper'>
-    <input placeholder='Search for anything!' class='new-query'>
     <button class='query btn'>Search</button>
+    <input placeholder='Search for anything!' class='new-query'>
     <div class='img-wrapper'>
       <img class='img-display' src="#">
       <div class='img-copy'>
@@ -71,6 +71,11 @@
       refresh.onclick = getNewImage
       searchBtn.onclick = getNewImage
       imgCopy.onclick = copyImg
+      searchBar.addEventListener('keyup', function(event){
+        if(event.keyCode === 13){
+          getNewImage()
+        }
+      })
 
       getNewImage()
 
