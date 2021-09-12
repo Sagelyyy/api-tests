@@ -1,84 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <title>API</title>
-</head>
-<body>
-  <section class='title wrapper'>
-    <h1 class='title'>Giphy API Search</h1>
-  </section>
-  <section class='content wrapper'>
-    <button class='query btn'>Search</button>
-    <input placeholder='Search for anything!' class='new-query'>
-    <div class='img-wrapper'>
-      <img class='img-display' src="#">
-      <div class='img-copy'>
-        <p class='copy-text'>Copy Url</p>
+  <head>
+    <meta charset="UTF-8" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <title>API</title>
+  </head>
+  <body>
+    <section class="title wrapper">
+      <h1 class="title">Giphy API Search</h1>
+    </section>
+    <section class="content wrapper">
+      <section class="search wrapper">
+        <input placeholder="Search for anything!" class="new-query" />
+        <button id ='query' class="material-icons query btn">search</button>
+      </section>
+      <div class="img-wrapper">
+        <img class="img-display" src="#" />
+        <div class="img-copy">
+          <p class="copy-text">Copy Url</p>
+        </div>
       </div>
-    </div>
-    <button class='refresh btn'>Refresh</button>
-  </section>
-  <script>
+      <button class="refresh btn">Refresh</button>
+    </section>
+    <script>
+      const img = document.querySelector("img");
+      const refresh = document.querySelector(".refresh");
+      const searchBar = document.querySelector(".new-query");
+      const searchBtn = document.querySelector("#query");
+      const imgCopy = document.querySelector(".img-copy");
 
-    const img = document.querySelector('img');
-    const refresh = document.querySelector('.refresh')
-    const searchBar = document.querySelector('.new-query')
-    const searchBtn = document.querySelector('.query')
-    const imgCopy = document.querySelector('.img-copy')
+      let currSearch = ["cats"];
+      let shortURL;
 
-    let currSearch = ['cats']
-    let shortURL
+      function clearSearch() {
+        currSearch.length = 0;
+      }
 
-    function clearSearch(){
-      currSearch.length = 0
-    }
+      function copyImg() {
+        navigator.permissions
+          .query({ name: "clipboard-write" })
+          .then((result) => {
+            if (result.state == "granted" || result.state == "prompt") {
+              navigator.clipboard.writeText(shortURL);
+            }
+          });
+      }
 
-    function copyImg(){
-      navigator.permissions.query({name: "clipboard-write"}).then(result => {
-  if (result.state == "granted" || result.state == "prompt") {
-   navigator.clipboard.writeText(shortURL)
-  }
-});
-    }
-
-    function getNewImage(){
-      if(searchBar.value == ''){
-        fetch(`https://api.giphy.com/v1/gifs/translate?api_key=xMGN1yiwkO4svRXTebmXFgCTZEP3ULmo&s=${currSearch[0]}`, {mode: 'cors'})
-            .then(function(response){
-                return(response.json());
-            })
-            .then(function(response){
-              img.src = response.data.images.original.url;
-              shortURL = response.data.embed_url;
-            })
-        }else{
-          clearSearch()
-        currSearch.push(searchBar.value)
-        fetch(`https://api.giphy.com/v1/gifs/translate?api_key=xMGN1yiwkO4svRXTebmXFgCTZEP3ULmo&s=${currSearch[0]}`, {mode: 'cors'})
-          .then(function(response){
-              return(response.json());
-          })
-          .then(function(response){
-            img.src = response.data.images.original.url;
-            shortURL = response.data.embed_url;
-          })
+      async function getNewImage() {
+        if (searchBar.value == "") {
+          try {
+            const response = await fetch(
+              `https://api.giphy.com/v1/gifs/translate?api_key=xMGN1yiwkO4svRXTebmXFgCTZEP3ULmo&s=${currSearch[0]}`,
+              { mode: "cors" }
+            );
+            const imgData = await response.json();
+            img.src = imgData.data.images.original.url;
+            shortURL = imgData.data.embed_url;
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          clearSearch();
+          currSearch.push(searchBar.value);
+          searchBar.value = "";
+          getNewImage();
         }
       }
 
-      refresh.onclick = getNewImage
-      searchBtn.onclick = getNewImage
-      imgCopy.onclick = copyImg
-      searchBar.addEventListener('keyup', function(event){
-        if(event.keyCode === 13){
-          getNewImage()
+      refresh.onclick = getNewImage;
+      searchBtn.onclick = getNewImage;
+      imgCopy.onclick = copyImg;
+      searchBar.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+          getNewImage();
         }
-      })
+      });
 
-      getNewImage()
-
-  </script>
-</body>
+      getNewImage();
+    </script>
+  </body>
 </html>
