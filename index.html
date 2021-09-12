@@ -2,17 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <title>API</title>
 </head>
 <body>
-  <section class='search-wrapper'>
-
+  <section class='title wrapper'>
+    <h1 class='title'>Giphy API Search</h1>
   </section>
   <section class='content wrapper'>
     <input placeholder='Search for anything!' class='new-query'>
     <button class='query btn'>Search</button>
-    <img src="#">
+    <div class='img-wrapper'>
+      <img class='img-display' src="#">
+      <div class='img-copy'>
+        <p class='copy-text'>Copy Url</p>
+      </div>
+    </div>
     <button class='refresh btn'>Refresh</button>
   </section>
   <script>
@@ -21,16 +27,35 @@
     const refresh = document.querySelector('.refresh')
     const searchBar = document.querySelector('.new-query')
     const searchBtn = document.querySelector('.query')
+    const imgCopy = document.querySelector('.img-copy')
 
     let currSearch = ['cats']
+    let shortURL
 
     function clearSearch(){
       currSearch.length = 0
     }
 
-    function newSearch(){
-      if(searchBar.value != ''){
-        clearSearch()
+    function copyImg(){
+      navigator.permissions.query({name: "clipboard-write"}).then(result => {
+  if (result.state == "granted" || result.state == "prompt") {
+   navigator.clipboard.writeText(shortURL)
+  }
+});
+    }
+
+    function getNewImage(){
+      if(searchBar.value == ''){
+        fetch(`https://api.giphy.com/v1/gifs/translate?api_key=xMGN1yiwkO4svRXTebmXFgCTZEP3ULmo&s=${currSearch[0]}`, {mode: 'cors'})
+            .then(function(response){
+                return(response.json());
+            })
+            .then(function(response){
+              img.src = response.data.images.original.url;
+              shortURL = response.data.embed_url;
+            })
+        }else{
+          clearSearch()
         currSearch.push(searchBar.value)
         fetch(`https://api.giphy.com/v1/gifs/translate?api_key=xMGN1yiwkO4svRXTebmXFgCTZEP3ULmo&s=${currSearch[0]}`, {mode: 'cors'})
           .then(function(response){
@@ -38,22 +63,14 @@
           })
           .then(function(response){
             img.src = response.data.images.original.url;
+            shortURL = response.data.embed_url;
           })
-      }
-    }
-
-    function getNewImage(){
-      fetch(`https://api.giphy.com/v1/gifs/translate?api_key=xMGN1yiwkO4svRXTebmXFgCTZEP3ULmo&s=${currSearch[0]}`, {mode: 'cors'})
-          .then(function(response){
-              return(response.json());
-          })
-          .then(function(response){
-            img.src = response.data.images.original.url;
-          })
+        }
       }
 
       refresh.onclick = getNewImage
-      searchBtn.onclick = newSearch
+      searchBtn.onclick = getNewImage
+      imgCopy.onclick = copyImg
 
       getNewImage()
 
